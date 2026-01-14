@@ -5,53 +5,42 @@ import fr.toucan.banquepersistence.dao.CompteDAO;
 import fr.toucan.banquepersistence.entities.Client;
 import fr.toucan.banquepersistence.entities.Compte;
 import fr.toucan.banquepersistence.util.BanqueException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 @Service
-@Transactional
 public class BanqueServiceImpl implements BanqueService {
 
+    private static final Logger logger = LoggerFactory.getLogger(BanqueServiceImpl.class);
 
+    @Autowired
     private ClientDAO clientDAO;
 
-
+    @Autowired
     private CompteDAO compteDAO;
 
-//    public void setClientDAO(ClientDAO clientDAO) {
-//        this.clientDAO = clientDAO;
-//    }
-//
-//    public void setCompteDAO(CompteDAO compteDAO) {
-//        this.compteDAO = compteDAO;
-//    }
-private static final Client CLIENT_DEV;
-
-    static {
-        CLIENT_DEV = new Client();
-        CLIENT_DEV.setId(1L);
-        CLIENT_DEV.setNom("Dupont");
-        CLIENT_DEV.setPrenom("Jean");
-        CLIENT_DEV.setMotDePasse("1234");
+    public BanqueServiceImpl(ClientDAO clientDAO) {
+        this.clientDAO = clientDAO;
     }
 
     @Override
     public Client authentifier(String indentifiant, String motDePasse) throws BanqueException {
+        long id = Long.parseLong(indentifiant);
         try {
-//            Client client = clientDAO.rechercherClientParId(Long.parseLong(indentifiant));
-//            if (client != null && client.getMotDePasse().equals(motDePasse))
-//                return client;
-            if ("1".equals(indentifiant) && "1234".equals(motDePasse)) {
-                return CLIENT_DEV;
-            }
+            Client client = clientDAO.rechercherClientParId(id);
+            if (client != null && client.getMotDePasse().equals(motDePasse))
+                return client;
 
             else
                 throw new BanqueException();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BanqueException("Erreur d'authentification.");
+            throw new BanqueException("Erreur d'authentification pour l'identifiant de client : " + id);
         }
     }
 
@@ -75,7 +64,7 @@ private static final Client CLIENT_DEV;
             Compte compteACrediter = compteDAO.rechercherCompteParNumero(numeroACrediter);
             double soldeCompteACrediter = compteACrediter.getSolde();
 
-           if (soldeCompteADebiter >= montant) {
+            if (soldeCompteADebiter >= montant) {
                 compteADebiter.setSolde(soldeCompteADebiter -= montant);
                 compteACrediter.setSolde(soldeCompteACrediter += montant);
 
