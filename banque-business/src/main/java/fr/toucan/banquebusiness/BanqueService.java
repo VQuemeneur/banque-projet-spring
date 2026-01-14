@@ -6,7 +6,6 @@ import fr.toucan.banquepersistence.util.BanqueException;
 
 import java.util.List;
 
-
 public interface BanqueService {
 
     public abstract Client authentifier(String indentifiant, String motDePasse) throws BanqueException;
